@@ -29,9 +29,11 @@ if (!tg->se)
 tg->shares = NICE_0_LOAD;
 ```
 
-3. **Initializing CFS Bandwidth Structure:** It initializes the `cfs_bandwidth` structure related to this task group by making a call to `init_cfs_bandwidth(tg_cfs_bandwidth(tg), tg_cfs_bandwidth(parent))`. This step is essential for managing bandwidth allocation for the controlled fair scheduling (CFS) of the task group.
+## Step 3: Initializing CFS Bandwidth Structure 
 
-## Step 3: Allocating and Initializing Per-CPU Structures
+It initializes the `cfs_bandwidth` structure related to this task group by making a call to `init_cfs_bandwidth(tg_cfs_bandwidth(tg), tg_cfs_bandwidth(parent))`. This step is essential for managing bandwidth allocation for the controlled fair scheduling (CFS) of the task group.
+
+## Step 4: Allocating and Initializing Per-CPU Structures
 
 For each possible CPU in the system, the task group setup process involves allocating memory for `cfs_rq` (Completely Fair Scheduler runqueue) and `se` (scheduling entity) structures, and initializing them accordingly. This is a critical step in ensuring that the scheduler has the necessary data structures to manage scheduling decisions for the task group on a per-CPU basis.
 
@@ -48,6 +50,7 @@ for_each_possible_cpu(i) {
     se = kzalloc_node(sizeof(struct sched_entity), GFP_KERNEL, cpu_to_node(i));
     if (!se)
         goto err_free_rq;
+    ...
 }
 ```
 
