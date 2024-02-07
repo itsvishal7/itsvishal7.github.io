@@ -191,3 +191,43 @@ void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
 
 - **Parent Association:** If applicable, assigns the parent scheduling entity to `se->parent`.
 
+
+---
+---
+
+
+
+# CFS Bandwidth Controller Unthrottling Logic
+
+The unthrottling process in the CFS bandwidth controller follows a specific code flow to ensure that tasks are scheduled fairly according to their runtime needs.
+
+## Code Flow
+
+1. **SCHED_CFS_PERIOD_TIMER**:
+    - This is likely the entry point in the timer interrupt that handles period timing for the CFS.
+2. **DO_SCHED_CFS_PERIOD_TIMER**:
+    - A function that is called by the period timer to handle tasks at the end of a period.
+3. **DISTRIBUTE_CFS_RUNTIME**:
+    - This function distributes run time to tasks. This could involve adjusting the runtime quotas for tasks based on their consumption and the period time.
+
+4. The unthrottling logic branches based on the current CPU:
+    - If `current_cpu == cfs_rq's cpu`:
+       1. **UNTHROTTLE_CFS_RQ**:
+           - This is the final unthrottling function that is called regardless of the CPU check. It is the common exit point for the unthrottling logic.
+
+    - If `current_cpu != cfs_rq's cpu`:
+        1. **UNTHROTTLE_CFS_RQ_ASYNC** executed by current CPU:
+            - This function asynchronously unthrottles a run queue that is not on the current CPU.
+        2. **_UNTHROTTLE_CFS_RQ_ASYNC** executed by current CPU:
+            - This appears to be the internal function that actually performs the asynchronous unthrottling.
+        3. **_CFSB_CSD_UNTHROTTLE** executed by cfs_rq's CPU:
+            - This function initiates the unthrottling on the cfs_rq's CPU.
+        4. **UNTHROTTLE_CFS_RQ** executed by cfs_rq's CPU
+            - Unthrottles this cfs_rq for the given `tg`
+
+
+## Note
+- There is a note indicating that the function and subsequent calls will be made from the CPU of the `cfs_rq`. This implies that the unthrottling process respects the CPU affinity of the run queue it is managing.
+
+---
+---
