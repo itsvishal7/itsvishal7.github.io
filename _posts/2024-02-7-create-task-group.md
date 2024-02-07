@@ -29,9 +29,10 @@ if (!tg->se)
 tg->shares = NICE_0_LOAD;
 ```
 
-## Step 3: Initializing CFS Bandwidth Structure 
+## Step 3: [Initializing CFS Bandwidth Structure](#init_cfs_bandwidth-function)
 
-It initializes the `cfs_bandwidth` structure related to this task group by making a call to `init_cfs_bandwidth(tg_cfs_bandwidth(tg), tg_cfs_bandwidth(parent))`. This step is essential for managing bandwidth allocation for the controlled fair scheduling (CFS) of the task group.
+It initializes the `cfs_bandwidth` structure related to this task group by making a call to `init_cfs_bandwidth(tg_cfs_bandwidth(tg), tg_cfs_bandwidth(parent))`. This step is essential for managing bandwidth allocation for the controlled fair scheduling (CFS) of the task group. \
+[Notes on `init_cfs_bandwidth`](#init_cfs_bandwidth-function)
 
 ## Step 4: Allocating and Initializing Per-CPU Structures
 
@@ -60,7 +61,8 @@ for_each_possible_cpu(i) {
 init_cfs_rq(cfs_rq);
 ```
 
-3. **Establishing Relationship Between `cfs_rq`, `se`, and `tg`:** The relationship between the created `cfs_rq` and `se` structures with the task group (`tg`) is established. This involves setting up pointers and references that link these structures together, ensuring that scheduling decisions can be made with full awareness of the task group's structure and hierarchy.
+3. **Establishing Relationship Between `cfs_rq`, `se`, and `tg`:** The relationship between the created `cfs_rq` and `se` structures with the task group (`tg`) is established. This involves setting up pointers and references that link these structures together, ensuring that scheduling decisions can be made with full awareness of the task group's structure and hierarchy. \
+[Notes on `init_tg_cfs_entry`](#init_tg_cfs_entry-function)
 
 ```c
 init_tg_cfs_entry(tg, cfs_rq, se, i, parent->se[i]);
@@ -75,3 +77,117 @@ init_entity_runnable_average(se);
 ## Error Handling
 
 During the allocation and initialization process, error handling is crucial to ensure that the system remains in a consistent state in case of memory allocation failures. The use of `goto` statements for error handling helps in cleanly rolling back partial changes if an error occurs during the setup of the per-CPU structures.
+
+
+---
+
+## `init_cfs_bandwidth` Function
+
+The `init_cfs_bandwidth` function initializes `struct cfs_bandwidth` structure of a task group. Here's a breakdown of its operations:
+
+<details>
+<summary> code </summary>
+
+```c
+void init_cfs_bandwidth(struct cfs_bandwidth *cfs_b, struct cfs_bandwidth *parent)
+{
+    raw_spin_lock_init(&cfs_b->lock);
+    cfs_b->runtime = 0;
+    cfs_b->quota = RUNTIME_INF;
+    cfs_b->period = ns_to_ktime(default_cfs_period());
+    cfs_b->burst = 0;
+    cfs_b->hierarchical_quota = parent ? parent->hierarchical_quota : RUNTIME_INF;
+
+    INIT_LIST_HEAD(&cfs_b->throttled_cfs_rq);
+    hrtimer_init(&cfs_b->period_timer, CLOCK_MONOTONIC, HRTIMER_MODE_ABS_PINNED);
+    cfs_b->period_timer.function = sched_cfs_period_timer;
+
+    /* Add a random offset so that timers interleave */
+    hrtimer_set_expires(&cfs_b->period_timer,
+                        get_random_u32_below(cfs_b->period));
+    hrtimer_init(&cfs_b->slack_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+    cfs_b->slack_timer.function = sched_cfs_slack_timer;
+    cfs_b->slack_started = false;
+}
+```
+</details>
+
+### Key Operations
+
+- **Initialize Lock:** The function starts by initializing the spin lock `&cfs_b->lock` whose job is to ensure thread-safe access to the bandwidth control structure.
+
+- **Set Runtime and Quota:** It sets the runtime to 0 and the quota to `RUNTIME_INF`, indicating no limit on the execution time until adjusted. This is the default state, ensuring the task group can execute without bandwidth restrictions initially.
+
+- **Configure Period and Burst:** The period is set using `ns_to_ktime(default_cfs_period())`, converting the default period from nanoseconds to kernel time format. The burst capability, which could allow temporary exceedance of the quota, is initialized to 0.
+
+- **Hierarchical Quota:** If a parent's `struct cfs_bandwidth`  exists, `cfs_b` inherits its hierarchical quota; otherwise, it's set to `RUNTIME_INF`, implying no hierarchical limits.
+
+- **Throttled CFS Runqueue List:** Initializes a list head for `cfs_b->throttled_cfs_rq`, which will track CFS runqueues that have been throttled due to bandwidth limitations.
+
+- **Period Timer Initialization:** A high-resolution timer (`period_timer`) is initialized to manage the periodic reset of runtime and quota. It uses a monotonic clock, pinned mode, and is set to trigger the `sched_cfs_period_timer` callback function. A random offset is added to the timer's expiration to interleave it with other timers, reducing simultaneous expirations.
+
+- **Slack Timer Setup:** Another timer, `slack_timer`, is initialized for handling slack time, allowing for some flexibility in quota enforcement. It's set to trigger the `sched_cfs_slack_timer` callback and is initially inactive (`slack_started = false`).
+
+---
+
+## `init_tg_cfs_entry` Function
+
+The `init_tg_cfs_entry` function is a crucial part of setting up task groups within the Completely Fair Scheduler (CFS) in the Linux kernel. It initializes the connection between a task group (`tg`), its scheduling entities (`se`), and the CFS runqueue (`cfs_rq`) for a specific CPU. Here's a detailed explanation of its operations:
+
+<details>
+<summary> code </summary>
+
+```c
+void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
+                       struct sched_entity *se, int cpu,
+                       struct sched_entity *parent)
+{
+    struct rq *rq = cpu_rq(cpu);
+
+    cfs_rq->tg = tg;
+    cfs_rq->rq = rq;
+    init_cfs_rq_runtime(cfs_rq);
+
+    tg->cfs_rq[cpu] = cfs_rq;
+    tg->se[cpu] = se;
+
+    /* se could be NULL for root_task_group */
+    if (!se)
+        return;
+
+    if (!parent) {
+        se->cfs_rq = &rq->cfs;
+        se->depth = 0;
+    } else {
+        se->cfs_rq = parent->my_q;
+        se->depth = parent->depth + 1;
+    }
+
+    se->my_q = cfs_rq;
+    /* guarantee group entities always have weight */
+    update_load_set(&se->load, NICE_0_LOAD);
+    se->parent = parent;
+}
+```
+</details>
+
+### Key Operations
+
+- **Retrieve CPU's Runqueue (`rq`):** Obtains the runqueue for the specified CPU to associate with the CFS runqueue.
+
+- **Association with Task Group and Runqueue:** Sets `cfs_rq->tg` to the provided task group (`tg`) and associates the CFS runqueue (`cfs_rq`) with the CPU's runqueue (`rq`).
+
+- **Initialize CFS Runqueue Runtime:** Calls `init_cfs_rq_runtime` to initialize runtime properties of `cfs_rq`, including setting `runtime_enabled` to 0 and initializing lists for throttled runqueues and control group scheduling domains.
+
+- **Assign CFS Runqueue and Scheduling Entity to Task Group:** Associates the CFS runqueue and scheduling entity with the task group for the specific CPU.
+
+- **Handle Root Task Group Case:** For the root task group, there may not be a scheduling entity (`se`), in which case the function returns early.
+
+- **Set Scheduling Entity Properties:** Configures the scheduling entity's properties based on whether it has a parent:
+  - If there is no parent, the scheduling entity is associated directly with the CPU's main CFS runqueue (`rq->cfs`) and its depth is set to 0.
+  - If there is a parent, the scheduling entity is linked to the parent's queue (`parent->my_q`) and its depth is incremented by 1 from the parent's depth.
+
+- **Update Scheduling Entity's Load:** Ensures that the scheduling entity has a default weight by setting its load to `NICE_0_LOAD`, indicating the standard weight for fair scheduling.
+
+- **Parent Association:** If applicable, assigns the parent scheduling entity to `se->parent`.
+
