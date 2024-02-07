@@ -1,3 +1,5 @@
+# Creation of new thread group
+
 Creating a new task group in the Linux kernel scheduler involves several steps, primarily focused on allocating and initializing the necessary data structures to support fair scheduling. Here's an overview of how a new task group is created, particularly focusing on the `alloc_fair_sched_group` and `sched_create_group` functions.
 
 ## Step 1: Allocation of Task Group Structure
