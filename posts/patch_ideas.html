@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>Linux kernel patch ideas</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/github-markdown.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/pilcrow.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+  </head>
+  <body>
+    <article class="markdown-body"><h3 id="linux-kernel-patch-ideas"><a class="header-link" href="#linux-kernel-patch-ideas"></a>Linux kernel patch ideas</h3>
+<p>Move globally declared cpumasks variables i.e. __cpu_online_mask,
+__cpu_active_mask, __cpu_present_mask and __cpu_possible_mask under
+CONFIG_SMP macro, reason being when CONFIG_SMP=N then these cpumasks should
+not be needed at all anywhere and as a side effect, it will help us remove
+#ifdef block (see below) altogether or move entire thing inside the #ifdef
+block</p>
+<p>Real saving are coming from memory that we save by not allocating masks in
+non SMP systems.</p>
+<pre class="hljs"><code><span class="hljs-comment">/*
+ * Activate the first processor.
+ */</span>
+void __init boot<span class="hljs-constructor">_cpu_init(<span class="hljs-params">void</span>)</span>
+{
+        <span class="hljs-built_in">int</span> cpu = smp<span class="hljs-constructor">_processor_id()</span>;
+
+        <span class="hljs-comment">/* Mark the boot cpu &quot;present&quot;, &quot;online&quot; etc for SMP and UP case */</span>
+        set<span class="hljs-constructor">_cpu_online(<span class="hljs-params">cpu</span>, <span class="hljs-params">true</span>)</span>;
+        set<span class="hljs-constructor">_cpu_active(<span class="hljs-params">cpu</span>, <span class="hljs-params">true</span>)</span>;
+        set<span class="hljs-constructor">_cpu_present(<span class="hljs-params">cpu</span>, <span class="hljs-params">true</span>)</span>;
+        set<span class="hljs-constructor">_cpu_possible(<span class="hljs-params">cpu</span>, <span class="hljs-params">true</span>)</span>;
+
+#ifdef CONFIG_SMP
+        __boot_cpu_id = cpu;
+#endif
+}</code></pre>    </article>
+  </body>
+</html>
