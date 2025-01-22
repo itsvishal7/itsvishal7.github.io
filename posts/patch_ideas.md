@@ -1,7 +1,8 @@
 ### Linux kernel patch ideas
 
 
-<details><summary>global cpu cpumasks are not needed in CONFIG_SMP=N systems </summary>
+<details><summary> Global cpumasks tracking online, active, present and possible CPUs are not needed in CONFIG_SMP=N systems </summary>
+
 Move the global CPU mask variables i.e. __cpu_online_mask, __cpu_active_mask,
 __cpu_present_mask, and __cpu_possible_mask inside the CONFIG_SMP macro.
 This change is important because when CONFIG_SMP is set to N (meaning SMP
@@ -9,6 +10,7 @@ is disabled), these CPU masks aren’t needed. By doing this, we can remove
 or simplify the #ifdef conditional blocks in the code. The main benefit is
 that it saves memory by not allocating these CPU masks on systems that
 don’t use SMP.
+        
 
 ```c
 /* kernel/cpu.c

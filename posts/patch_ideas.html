@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>Linux kernel patch ideas</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/github-markdown.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/pilcrow.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+  </head>
+  <body>
+    <article class="markdown-body"><h3 id="linux-kernel-patch-ideas"><a class="header-link" href="#linux-kernel-patch-ideas"></a>Linux kernel patch ideas</h3>
+<details><summary> Global cpumasks tracking online, active, present and possible CPUs are not needed in CONFIG_SMP=N systems </summary>
+
+<p>Move the global CPU mask variables i.e. __cpu_online_mask, __cpu_active_mask,
+__cpu_present_mask, and __cpu_possible_mask inside the CONFIG_SMP macro.
+This change is important because when CONFIG_SMP is set to N (meaning SMP
+is disabled), these CPU masks aren’t needed. By doing this, we can remove
+or simplify the #ifdef conditional blocks in the code. The main benefit is
+that it saves memory by not allocating these CPU masks on systems that
+don’t use SMP.</p>
+<pre class="hljs"><code><span class="hljs-comment">/* kernel/cpu.c
+ *
+ * Activate the first processor.
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> __init <span class="hljs-title">boot_cpu_init</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span>
+</span>{
+        <span class="hljs-keyword">int</span> cpu = smp_processor_id();
+
+        <span class="hljs-comment">/* Mark the boot cpu &quot;present&quot;, &quot;online&quot; etc for SMP and UP case */</span>
+        set_cpu_online(cpu, <span class="hljs-literal">true</span>);
+        set_cpu_active(cpu, <span class="hljs-literal">true</span>);
+        set_cpu_present(cpu, <span class="hljs-literal">true</span>);
+        set_cpu_possible(cpu, <span class="hljs-literal">true</span>);
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_SMP</span>
+        __boot_cpu_id = cpu;
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+}</code></pre></details>
+    </article>
+  </body>
+</html>
