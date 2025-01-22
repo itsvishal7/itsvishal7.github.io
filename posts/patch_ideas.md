@@ -1,6 +1,6 @@
-### Linux kernel patch ideas
+### 💡 Linux kernel patch ideas
 
-<details><summary> Global cpumasks tracking online, active, present and possible CPUs are not needed in CONFIG_SMP=N systems </summary>
+<details><summary> 🖱️ Global cpumasks tracking online, active, present and possible CPUs are not needed in CONFIG_SMP=N systems </summary>
 
 Move the global CPU mask variables i.e. __cpu_online_mask, __cpu_active_mask,
 __cpu_present_mask, and __cpu_possible_mask inside the CONFIG_SMP macro.
