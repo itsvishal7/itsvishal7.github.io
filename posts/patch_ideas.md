@@ -1,6 +1,5 @@
 ### Linux kernel patch ideas
 
-
 <details><summary> Global cpumasks tracking online, active, present and possible CPUs are not needed in CONFIG_SMP=N systems </summary>
 
 Move the global CPU mask variables i.e. __cpu_online_mask, __cpu_active_mask,
@@ -33,3 +32,6 @@ void __init boot_cpu_init(void)
 }
 ```
 </details>
+
+
+Testing new additions
