@@ -1,18 +1,18 @@
 ### Linux kernel patch ideas
 
 
-Move globally declared cpumasks variables i.e. __cpu_online_mask,
-__cpu_active_mask, __cpu_present_mask and __cpu_possible_mask under
-CONFIG_SMP macro, reason being when CONFIG_SMP=N then these cpumasks should
-not be needed at all anywhere and as a side effect, it will help us remove
-#ifdef block (see below) altogether or move entire thing inside the #ifdef
-block
+<details><summary>global cpu cpumasks are not needed in CONFIG_SMP=N systems </summary>
+Move the global CPU mask variables i.e. __cpu_online_mask, __cpu_active_mask,
+__cpu_present_mask, and __cpu_possible_mask inside the CONFIG_SMP macro.
+This change is important because when CONFIG_SMP is set to N (meaning SMP
+is disabled), these CPU masks aren’t needed. By doing this, we can remove
+or simplify the #ifdef conditional blocks in the code. The main benefit is
+that it saves memory by not allocating these CPU masks on systems that
+don’t use SMP.
 
-Real saving are coming from memory that we save by not allocating masks in
-non SMP systems.
-
-```
-/*
+```c
+/* kernel/cpu.c
+ *
  * Activate the first processor.
  */
 void __init boot_cpu_init(void)
@@ -30,3 +30,4 @@ void __init boot_cpu_init(void)
 #endif
 }
 ```
+</details>
