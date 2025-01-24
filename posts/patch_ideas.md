@@ -37,6 +37,44 @@ void __init boot_cpu_init(void)
 
 </details>
 
+<details><summary> 🖱️ convert to static key </summary>
+
+\
+Can `cpu_hotplug_offline_disabled` and `cpu_hotplug_disabled` be converted to static keys?
+- since hotplug is a rare event, this code path isn't exercised much, hence does it make sense to use static key here
+
+```c
+/* kernel/cpu.c */
+ static int cpu_down_maps_locked(unsigned int cpu, enum cpuhp_state target)
+  {
+          struct cpu_down_work work = { .cpu = cpu, .target = target, };
+
+          /*
+           * If the platform does not support hotplug, report it explicitly to
+           * differentiate it from a transient offlining failure.
+           */
+          if (cpu_hotplug_offline_disabled)
+                  return -EOPNOTSUPP;
+          if (cpu_hotplug_disabled)
+                  return -EBUSY;
+
+          /*
+           * Ensure that the control task does not run on the to be offlined
+           * CPU to prevent a deadlock against cfs_b->period_timer.
+           * Also keep at least one housekeeping cpu onlined to avoid generating
+           * an empty sched_domain span.
+           */
+          for_each_cpu_and(cpu, cpu_online_mask, housekeeping_cpumask(HK_TYPE_DOMAIN)) {
+                  if (cpu != work.cpu)
+                          return work_on_cpu(cpu, __cpu_down_maps_locked, &work);
+          }
+          return -EBUSY;
+  }
+```
+---
+
+</details>
+
 
 
 
