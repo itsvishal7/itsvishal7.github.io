@@ -301,8 +301,19 @@ ptrace ENTER (tid=136581 pid=136581 comm=strace): request: 0x00000018, target_pi
 🔥 
 ## TL;DR
 
+Choose wisely! ⚡
 - **Use `-D`** 🏗️ when you want the **tracee to stay alive** if the tracer is accidentally killed.  
 - **Use `-DD`** 🔄 when tracing a process but **don’t want to be in the same process group**.  
 - **Use `-DDD`** 🚀 when tracing a process **started in a different session** and **don’t want the tracer to die when the session terminates**.  
 
-Choose wisely! ⚡
+Key learnings! ⚡
+```
+$ kill -<signal_num> <process>
+$ kill -<signal_num> -<process_group>
+$ pkill -s <session_num> --signal <signal_num>
+
+# one can attach strace to strace itself in another terminal using pid
+# to understand behaviour of strace using `ptrace` syscalls clubbed with
+# clone and execve
+$ strace -p <another_strace_process_id>
+```
