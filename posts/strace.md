@@ -1,6 +1,7 @@
-# strace 
+# 🚀 `strace` Daemonization: `-D`, `-DD`, `-DDD` Explained
 
--D, -DD, -DDD options
+## 🔹 `-D`, `-DD`, `-DDD` Options
+
 ```
        -D
        --daemonize
@@ -24,10 +25,14 @@
 
 ```
 
-### htop output
-#### without -D, -DD, -DDD
-without `daemonize` option, killing `strace` would kill the `stress-ng`
-too, in other words killing tracer will kill tracee too.
+Note: `pid`, `ppid` etc. data have been collected through `htop`
+
+
+## ❌ Without `-D`, `-DD`, `-DDD`
+Without `daemonize`, killing `strace` **also kills the tracee** (`stress-ng`).  
+In other words, **killing the tracer kills the tracee too**. ⚠️  
+
+📊 **Process Tree:**
 ```
 PID    PPID▽   PGRP     SID    TGID Command
 113013  113012  113009  111158  113013 stress-ng-cpu [run]
@@ -35,7 +40,8 @@ PID    PPID▽   PGRP     SID    TGID Command
 113009  111158  113009  111158  113009 strace -- stress-ng -c 1
 ```
 
-<details><summary>ptrace output of strace</summary>
+📡 **`ptrace` Output of `strace`** _(click to expand)_  
+<details><summary>📜 Show output</summary>
 
 ```
 Attaching 5 probes...
@@ -75,21 +81,23 @@ ptrace ENTER (tid=136317 pid=136317 comm=strace): request: 0x0000420e, target_pi
 ```
 </details>
 
-#### with -D
-with -D, if the tracer gets killed as a side-effect tracee won't get
-killed, but, if a signal sent to tracee's process group, it will be
-received by the tracer as well. meaning tracee can affect tracer
+---
 
-To see this in action, use `kill` to send a dummy signal to the process
-group id
-```
+## ✅ With `-D` 🏗️
+With `-D`:  
+✔️ If the **tracer is killed, the tracee survives**.  
+⚠️ **However, if a signal is sent to the tracee’s process group, the tracer also receives it!**  
+💡 Meaning, **the tracee can influence the tracer**.
+
+👀 **Try This:**
+```bash
 strace -p 112660
 
 ## in another terminal
 $ kill -18 -112656
 ```
 
-
+📊 **Process Tree:**
 ```
    PID    PPID▽   PGRP     SID    TGID Command
 112661  112656  112656  111158  112661 stress-ng-cpu [run]
@@ -98,9 +106,11 @@ $ kill -18 -112656
 
 ```
 
-<details><summary>ptrace output of strace</summary>
 
-```
+📡 **`ptrace` Output of `strace`** _(click to expand)_  
+<details><summary>📜 Show output</summary>
+
+```bash
 Attaching 5 probes...
 speech-dispatch:91690: clone
 telemetryd_v2:135594: clone
@@ -144,16 +154,22 @@ ptrace ENTER (tid=136391 pid=136391 comm=strace): request: 0x0000420e, target_pi
 ```
 </details>
 
-#### with -DD
-with -DD, tracer runs in a separate process group, but, in same session as
-tracee,
-and signal sent to tracee's session will be sent to the tracer as well
-```
+---
+
+## ✅ With `-DD` 🔄
+With `-DD`:  
+✔️ The tracer runs in a **separate process group** but in the **same session** as the tracee.  
+⚠️ **Signals sent to the tracee's session will also be sent to the tracer.**  
+
+👀 **Try This:**
+```bash
 $ strace -p 112827
 
 ## in another terminal
 pkill -s 111158 --signal 18
 ```
+
+📊 **Process Tree:**
 ```
    PID    PPID▽   PGRP     SID    TGID Command
 112828  112823  112823  111158  112828 stress-ng-cpu [run]
@@ -162,9 +178,11 @@ pkill -s 111158 --signal 18
 
 ```
 
-<details><summary>ptrace output of strace</summary>
 
-```
+📡 **`ptrace` Output of `strace`** _(click to expand)_  
+<details><summary>📜 Show output</summary>
+
+```bash
 Attaching 5 probes...
 speech-dispatch:91690: clone
 bash:126787: clone
@@ -210,8 +228,14 @@ ptrace ENTER (tid=136436 pid=136436 comm=strace): request: 0x00000018, target_pi
 ```
 </details>
 
-#### with -DDD
-with -DDD, tracer runs in a separate process group and session than tracee
+---
+
+## ✅ With `-DDD` 🚀
+With `-DDD`:  
+✔️ The tracer runs in a **completely separate process group and session** than the tracee.  
+💯 **This is true daemonization**!  
+
+📊 **Process Tree:**
 ```
    PID    PPID▽   PGRP     SID    TGID Command
 112925  112920  112920  111158  112925 stress-ng-cpu [run]
@@ -220,9 +244,10 @@ with -DDD, tracer runs in a separate process group and session than tracee
 
 ```
 
-<details><summary>ptrace output of strace</summary>
+📡 **`ptrace` Output of `strace`** _(click to expand)_  
+<details><summary>📜 Show output</summary>
 
-```
+```bash
 Attaching 5 probes...
 telemetryd_v2:135594: clone
 speech-dispatch:91690: clone
@@ -269,3 +294,12 @@ ptrace ENTER (tid=136581 pid=136581 comm=strace): request: 0x00000018, target_pi
 ```
 </details>
 
+---
+
+## 🔥 TL;DR  
+
+- **Use `-D`** 🏗️ when you want the **tracee to stay alive** if the tracer is accidentally killed.  
+- **Use `-DD`** 🔄 when tracing a process but **don’t want to be in the same process group**.  
+- **Use `-DDD`** 🚀 when tracing a process **started in a different session** and **don’t want the tracer to die when the session terminates**.  
+
+Choose wisely! ⚡
