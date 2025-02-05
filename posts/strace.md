@@ -1,5 +1,7 @@
 # 🚀 `strace` Daemonization: `-D`, `-DD`, `-DDD` Explained
 
+🔥 [TL;DR ](#tldr)
+
 ## 🔹 `-D`, `-DD`, `-DDD` Options
 
 ```
@@ -272,7 +274,7 @@ ptrace ENTER (tid=136577 pid=136577 comm=strace): request: 0x0000420e, target_pi
 ptrace ENTER (tid=136577 pid=136577 comm=strace): request: 0x00000018, target_pid: 0x00021583, addr: 0x00000000, data: 0x00000000
 strace:136577: clone
 strace:136580: clone
-ptrace ENTER (tid=136581 pid=136581 comm=strace): request: 0x00004206, target_pid: 0x00021581, addr: 0x00000000, data: 0x00000051
+ptrace ENTER (tid=1link36581 pid=136581 comm=strace): request: 0x00004206, target_pid: 0x00021581, addr: 0x00000000, data: 0x00000051
 ptrace ENTER (tid=136581 pid=136581 comm=strace): request: 0x00004207, target_pid: 0x00021581, addr: 0x00000000, data: 0x00000000
 ptrace ENTER (tid=136581 pid=136581 comm=strace): request: 0x00004204, target_pid: 0x00021581, addr: 0x00000001, data: 0x55cb66f320c0
 ptrace ENTER (tid=136581 pid=136581 comm=strace): request: 0x00000018, target_pid: 0x00021581, addr: 0x00000000, data: 0x00000000
@@ -296,7 +298,8 @@ ptrace ENTER (tid=136581 pid=136581 comm=strace): request: 0x00000018, target_pi
 
 ---
 
-## 🔥 TL;DR  
+🔥 
+## TL;DR
 
 - **Use `-D`** 🏗️ when you want the **tracee to stay alive** if the tracer is accidentally killed.  
 - **Use `-DD`** 🔄 when tracing a process but **don’t want to be in the same process group**.  
