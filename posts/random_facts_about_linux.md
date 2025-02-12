@@ -1,7 +1,7 @@
 # Random facts about Linux kernel
 
 ## quick tags
-[#syscallnr](#system-calls-the-gateways)
+[#syscallnr](#system-call-numbers)
 
 asfdadsfasdfasf
 
@@ -66,7 +66,7 @@ as
 fsa
 as
 asdfadsf
-## System Calls: The Gateways {#system-calls-the-gateways}
+## System Call Numbers
 - **System calls** are how user space requests services from the kernel (e.g., opening a file, 
   allocating memory, etc.). Different architectures maintain their own mapping of system call 
   numbers in `.tbl` files, like `arch/x86/entry/syscalls/syscall_64.tbl` or 
