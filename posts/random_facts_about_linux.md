@@ -2,6 +2,8 @@
 
 ## quick tags ✨
 [#syscallnr](#-system-call-numbers-and-where-to-find-them) 🚀
+[#signal](#-info-on-numerous-signals) 📶
+[#error](#-info-on-errors) ⁉️
 
 ## 🔢 System Call Numbers and Where to find them
 tl;dr `arch/*/include/generated/asm/syscall*.h` and `arch/*/**/syscall*.tbl`
