@@ -14,22 +14,5 @@ tl;dr `arch/*/include/generated/asm/syscall*.h` and `arch/*/**/syscall*.tbl`
 - `man 7 signal`
 - `arch/powerpc/include/uapi/aal.hsm/signal.h`
 
-
-
-
-
-asfdads
-a
-sfasfadsf
-asdfadsfa
-
-
-
-asfdasfd
-a
-
-
-asfda
-
 ## 💀 Info on errors
 - `include/uapi/asm-generic/errno.h`
