@@ -75,7 +75,19 @@ Can `cpu_hotplug_offline_disabled` and `cpu_hotplug_disabled` be converted to st
 
 </details>
 
+<details><summary> 🖱️ nvim lua script to fold ftrace function_graph </summary>
 
+[something like this](https://github.com/torvalds/linux/blob/09fbf3d502050282bf47ab3babe1d4ed54dd1fd8/Documentation/trace/function-graph-fold.vim)  but in lua
+Will need to understand: 
+- vim folds and how do they work
+- ftrace:
+  - collect a trace, matching parenthesis part needs to be verified
+  - just enable ftrace function_graph globally, because ftrace will start tracing in the middle, proper folds will not be possible
+  - or, maybe just trace a given function, here, ftrace will start tracing only when a function is hit, stops tracing the it exits, this would work, i suppose
+
+---
+
+</details>
 
 
 
