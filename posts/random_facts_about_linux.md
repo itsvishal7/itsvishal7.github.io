@@ -11,3 +11,6 @@ tl;dr `arch/*/include/generated/asm/syscall*.h` and `arch/*/**/syscall*.tbl`
 ## 📶 Info on numerous signals
 - `man 7 signal`
 - `arch/powerpc/include/uapi/asm/signal.h`
+
+## ⁉️ Info on errors
+- `include/uapi/asm-generic/errno.h`
