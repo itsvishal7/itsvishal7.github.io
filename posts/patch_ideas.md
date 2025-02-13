@@ -90,6 +90,96 @@ Will need to understand:
 </details>
 
 
+<details><summary> 🔎 ptrace selftests failing on powerpc </summary>
+
+\
+Build and run `ptrace` selftests in linux kernel
+```bash
+make O=/tmp/ptrace headers
+make -C tools/testing/selftests/ O=/tmp/ptrace TARGETS=ptrace run_tests
+```
+
+```
+make: Entering directory '/root//linux/tools/testing/selftests'
+make[1]: Entering directory '/root//linux/tools/testing/selftests/ptrace'
+CFLAGS = -std=c99 -pthread -Wall -isystem /tmp/ptrace/usr/include
+KHDR_INCLUDES = -isystem /tmp/ptrace/usr/include
+  CC       set_syscall_info
+  CC       peeksiginfo
+  CC       vmaccess
+  CC       get_set_sud
+make[1]: Leaving directory '/root//linux/tools/testing/selftests/ptrace'
+make[1]: Entering directory '/root//linux/tools/testing/selftests/ptrace'
+CFLAGS = -std=c99 -pthread -Wall -isystem /tmp/ptrace/usr/include
+KHDR_INCLUDES = -isystem /tmp/ptrace/usr/include
+TAP version 13
+1..5
+# timeout set to 45
+# selftests: ptrace: get_syscall_info
+# TAP version 13
+# 1..1
+# # Starting 1 tests from 1 test cases.
+# #  RUN           global.get_syscall_info ...
+# #            OK  global.get_syscall_info
+# ok 1 global.get_syscall_info
+# # PASSED: 1 / 1 tests passed.
+# # Totals: pass:1 fail:0 xfail:0 xpass:0 skip:0 error:0
+ok 1 selftests: ptrace: get_syscall_info
+
+# timeout set to 45
+# selftests: ptrace: set_syscall_info
+# TAP version 13
+# 1..1
+# # Starting 1 tests from 1 test cases.
+# #  RUN           global.set_syscall_info ...
+# #            OK  global.set_syscall_info
+# ok 1 global.set_syscall_info
+# # PASSED: 1 / 1 tests passed.
+# # Totals: pass:1 fail:0 xfail:0 xpass:0 skip:0 error:0
+ok 2 selftests: ptrace: set_syscall_info
+
+# timeout set to 45
+# selftests: ptrace: peeksiginfo
+# PASS
+ok 3 selftests: ptrace: peeksiginfo
+
+# timeout set to 45
+# selftests: ptrace: vmaccess
+# TAP version 13
+# 1..2
+# # Starting 2 tests from 1 test cases.
+# #  RUN           global.vmaccess ...
+# #            OK  global.vmaccess
+# ok 1 global.vmaccess
+# #  RUN           global.attach ...
+# # attach: Test terminated by timeout
+# #          FAIL  global.attach
+# not ok 2 global.attach
+# # FAILED: 1 / 2 tests passed.
+# # Totals: pass:1 fail:1 xfail:0 xpass:0 skip:0 error:0
+not ok 4 selftests: ptrace: vmaccess # exit=1
+
+# timeout set to 45
+# selftests: ptrace: get_set_sud
+# TAP version 13
+# 1..1
+# # Starting 1 tests from 1 test cases.
+# #  RUN           global.get_set_sud ...
+# # get_set_sud.c:43:get_set_sud:Expected ret (-1) == 0 (0)
+# # get_set_sud: Test terminated by assertion
+# #          FAIL  global.get_set_sud
+# not ok 1 global.get_set_sud
+# # FAILED: 0 / 1 tests passed.
+# # Totals: pass:0 fail:1 xfail:0 xpass:0 skip:0 error:0
+not ok 5 selftests: ptrace: get_set_sud # exit=1
+make[1]: Leaving directory '/root//linux/tools/testing/selftests/ptrace'
+make: Leaving directory '/root//linux/tools/testing/selftests'
+```
+
+---
+
+</details>
+
 
 ### 🐟 Interesting concepts
 ---
