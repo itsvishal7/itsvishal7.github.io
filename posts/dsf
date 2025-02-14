@@ -1,0 +1,5 @@
+### ⏰🥢 CONFIG_NO_HZ 
+
+dynticks-idle CPUs: These are the CPUs that are not sent any scheduling-clock interrupts by the kernel, built with CONFIG_NO_HZ=y, if they are idle.
+adaptive-ticks CPUs : These are the CPUs that are not sent any scheduling-clock interrupts by the kernel, built with CONFIG_NO_HZ_FULL=y, if they are running only a single runnable task.
+
