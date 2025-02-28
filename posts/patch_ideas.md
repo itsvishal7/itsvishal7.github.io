@@ -180,6 +180,29 @@ make: Leaving directory '/root//linux/tools/testing/selftests'
 
 </details>
 
+<details><summary>🕳️ Adding SCHED_WARN_ON in pick_eevdf</summary>
+
+There is a possibility that `pick_eevdf()` can still return `NULL` causing kernel panic in `pick_next_entity()`
+```diff
+diff --git a/kernel/sched/fair.c b/kernel/sched/fair.c
+index 1c0ef435a7aa..be8e3ba38d63 100644
+--- a/kernel/sched/fair.c
++++ b/kernel/sched/fair.c
+@@ -964,6 +964,12 @@ static struct sched_entity *pick_eevdf(struct cfs_rq *cfs_rq)
+        if (!best || (curr && entity_before(curr, best)))
+                best = curr;
+
++       /*
++        * The return value of pick_eevdf gets dereferenced
++        * without a NULL check in pick_next_entity.
++        * Add SCHED_WARN_ON to catch it.
++        */
++       SCHED_WARN_ON(!best);
+        return best;
+ }
+```
+</details>
+
 
 ### 🐟 Interesting concepts
 ---
