@@ -1,5 +1,4 @@
 ### 💡 Linux kernel patch ideas
----
 
 <details><summary> 🖱️ Global cpumasks tracking online, active, present and possible CPUs are not needed in CONFIG_SMP=N systems </summary>
 
@@ -203,9 +202,9 @@ index 1c0ef435a7aa..be8e3ba38d63 100644
 ```
 </details>
 
+---
 
 ### 🐟 Interesting concepts
----
 #### jump label [kernel documentation](https://docs.kernel.org/staging/static-keys.html)
   
 Using the ‘asm goto’, we can create branches that are either taken or not taken by default, without the need to check memory. Then, at run-time, we can patch the branch site to change the branch direction.
