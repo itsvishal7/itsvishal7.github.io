@@ -202,10 +202,11 @@ index 1c0ef435a7aa..be8e3ba38d63 100644
 ```
 </details>
 
-<details><summary> 🤔 why so many execve?</summary></
-        if a process/program executes more than one `execve`, because the binary was not present. perhaps it's a good idea to use file system api to figure out where a binary exists.
+<details><summary> 🤔 why so many execve?</summary>
+        
+if a process/program executes more than one `execve`, because the binary was not present. perhaps it's a good idea to use file system api to figure out where a binary exists.
 ```
-        18:35:50.335560 2583    2582    /usr/libexec/gcc/x86_64-redhat-linux/14/cc1 -quiet setuid.c -quiet -dumpdir a- -dumpbase setuid.c -dumpbase-ext .c -mtune=generic -march=x86-64 -o /tmp/ccAr4gUY.s
+18:35:50.335560 2583    2582    /usr/libexec/gcc/x86_64-redhat-linux/14/cc1 -quiet setuid.c -quiet -dumpdir a- -dumpbase setuid.c -dumpbase-ext .c -mtune=generic -march=x86-64 -o /tmp/ccAr4gUY.s
 18:35:50.455417 2584    2582    as --64 -o /tmp/ccaUs46A.o /tmp/ccAr4gUY.s
 18:35:50.455674 2584    2582    as --64 -o /tmp/ccaUs46A.o /tmp/ccAr4gUY.s
 18:35:50.455989 2584    2582    as --64 -o /tmp/ccaUs46A.o /tmp/ccAr4gUY.s
@@ -216,7 +217,7 @@ index 1c0ef435a7aa..be8e3ba38d63 100644
 18:35:50.491106 2586    2585    /usr/bin/ld -plugin /usr/libexec/gcc/x86_64-redhat-linux/14/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/14/lto-wrapper -plugin-opt=-fresolution=/tmp/ccc7g5Gk.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64
 ```
 ```
-        # cat pid.2584
+# cat pid.2584
 execve("/root/.local/bin/as", ["as", "--64", "-o", "/tmp/ccaUs46A.o", "/tmp/ccAr4gUY.s"], 0x3ac35fc0 /* 38 vars */) = -1 ENOENT (No such file or directory)
 execve("/root/bin/as", ["as", "--64", "-o", "/tmp/ccaUs46A.o", "/tmp/ccAr4gUY.s"], 0x3ac35fc0 /* 38 vars */) = -1 ENOENT (No such file or directory)
 execve("/usr/local/sbin/as", ["as", "--64", "-o", "/tmp/ccaUs46A.o", "/tmp/ccAr4gUY.s"], 0x3ac35fc0 /* 38 vars */) = -1 ENOENT (No such file or directory)
@@ -225,9 +226,8 @@ execve("/usr/sbin/as", ["as", "--64", "-o", "/tmp/ccaUs46A.o", "/tmp/ccAr4gUY.s"
 execve("/usr/bin/as", ["as", "--64", "-o", "/tmp/ccaUs46A.o", "/tmp/ccAr4gUY.s"], 0x3ac35fc0 /* 38 vars */) = 0
 exit_group(0)                           = ?
 +++ exited with 0 +++
-
 ```
-
+Note: next statement/instruction after a successful execve is not should never be reached.
 </details>
 
 ---
